@@ -14,12 +14,29 @@ Because your base system is unmodified upstream and most packages come
 from upstream, most security fixes reach users through upstream's own
 channels. Your work is the part that is yours.
 
-| | Base system | Upstream packages | Your packages |
-|---|---|---|---|
-| FreeBSD 16 | the template builds world from source, so the result is not byte-identical to upstream's binaries. The base system can also be installed as packages (`freebsd-base(7)`): upstream's `FreeBSD-base` repository (defined but disabled in `/etc/pkg/FreeBSD.conf`) is updated with `pkg upgrade -r FreeBSD-base`. If you use `src.conf` knobs, build your own base packages from the same source tree (`make packages` / `update-packages`, `build(7)`) and serve them from your repository. Otherwise, ship rebuilt images | `pkg upgrade` from the upstream repository | rebuild, publish, `pkg upgrade` |
-| NetBSD 11.0 | the template unpacks upstream's release sets; apply upstream's security advisories as upstream describes them | `pkgin upgrade` (or `pkg_add -u`) | rebuild, re-index, publish |
-| OpenBSD 8.0 | the base comes from the stock install sets, so `syspatch(8)` applies upstream's binary patches | `pkg_add -u` | rebuild, sign, publish |
-| DragonFly 6.4.2 | rebuild from the release branch, or ship new images | `pkg upgrade` | rebuild, sign, publish |
+**FreeBSD 16**
+
+- Base system: the template builds world from source, so the result is not byte-identical to upstream's binaries. The base system can also be installed as packages (`freebsd-base(7)`): upstream's `FreeBSD-base` repository (defined but disabled in `/etc/pkg/FreeBSD.conf`) is updated with `pkg upgrade -r FreeBSD-base`. If you use `src.conf` knobs, build your own base packages from the same source tree (`make packages` / `update-packages`, `build(7)`) and serve them from your repository. Otherwise, ship rebuilt images
+- Upstream packages: `pkg upgrade` from the upstream repository
+- Your packages: rebuild, publish, `pkg upgrade`
+
+**NetBSD 11.0**
+
+- Base system: the template unpacks upstream's release sets; apply upstream's security advisories as upstream describes them
+- Upstream packages: `pkgin upgrade` (or `pkg_add -u`)
+- Your packages: rebuild, re-index, publish
+
+**OpenBSD 8.0**
+
+- Base system: the base comes from the stock install sets, so `syspatch(8)` applies upstream's binary patches
+- Upstream packages: `pkg_add -u`
+- Your packages: rebuild, sign, publish
+
+**DragonFly 6.4.2**
+
+- Base system: rebuild from the release branch, or ship new images
+- Upstream packages: `pkg upgrade`
+- Your packages: rebuild, sign, publish
 
 The routine:
 
@@ -48,7 +65,9 @@ Do it on a branch, as a new build, with the same gates as any release:
    for example `site80.tgz` for 8.0), and the new stock install image on
    the media node. DragonFly: the new source tree and DPorts.
 3. **Review `ours.list`.** Upstream may now ship what you patched or
-   added; drop those entries. Rebuild every compiled package for the new
+   added; drop those entries, then run
+   [the self-hosted check](03-packages.md#the-self-hosted-check) against
+   the new repository. Rebuild every compiled package for the new
    ABI. Data and meta-packages usually only need a rebuild with the new
    ABI string.
 4. **Open a new repository directory per ABI** (`FreeBSD:17:amd64/`,

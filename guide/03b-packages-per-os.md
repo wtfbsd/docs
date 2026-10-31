@@ -1,10 +1,10 @@
 <!-- Copyright (c) 2026 The wtfbsd contributors. BSD-2-Clause (see LICENSE). -->
 
-# Stage 4b: build, sign and serve your packages, per OS
+# Stage 3b: build, sign and serve your packages, per OS
 
-[Index](README.md) · Policy: [Stage 4](04-packages.md) · Next: [Stage 5: CI](05-ci.md)
+[Index](README.md) · Policy: [Stage 3](03-packages.md) · Next: [Stage 4: build media](04-build-media.md)
 
-Read [Stage 4](04-packages.md) first: you build only the packages in
+Read [Stage 3](03-packages.md) first: you build only the packages in
 `ours.list`, and everything else comes from upstream. The host name
 `pkg.example.org` and the paths below are placeholders.
 
@@ -286,5 +286,22 @@ On a VM booted from your media:
    published).
 2. Each package in `ours.list` installs; its dependencies come from
    upstream.
-3. Nothing in the product repository is missing from `ours.list`, and
-   every line of `ours.list` has a reason.
+3. [The self-hosted check](03-packages.md#the-self-hosted-check)
+   passes. It is defined once, in Stage 3; here is how to feed it.
+
+FreeBSD and DragonFly, on the client (use the repository names from
+the client files: on FreeBSD 16 upstream is `FreeBSD-ports` plus
+`FreeBSD-ports-kmods`, on DragonFly the name in `df-latest.conf`):
+
+```sh
+pkg update -f
+pkg rquery -a -r ExampleBSD '%n' > published.txt
+pkg rquery -a -r ExampleBSD '%n-%v' > published.nv
+pkg rquery -a -r FreeBSD-ports '%n-%v' > upstream.nv
+pkg rquery -a -r FreeBSD-ports-kmods '%n-%v' >> upstream.nv
+sh tests/ours-check.sh ours.list published.txt upstream.nv published.nv
+```
+
+NetBSD: take the `PKGNAME=` lines of each repository's `pkg_summary.gz`
+(they are `name-version`), and strip the version for the name list.
+OpenBSD: the file names in each repository directory without `.tgz`.

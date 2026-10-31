@@ -1,13 +1,17 @@
 <!-- Copyright (c) 2026 The wtfbsd contributors. BSD-2-Clause (see LICENSE). -->
 
-# Stage 3: build the media
+# Stage 4: build the media
 
-[Index](README.md) · Previous: [Stage 2](02-overlays-and-profiles.md) · Next: [Stage 4: packages](04-packages.md)
+[Index](README.md) · Previous: [Stage 3b](03b-packages-per-os.md) · Next: [Stage 5: CI](05-ci.md)
 
 Each template has one `build.sh`. It reads `product.conf` (it parses the
 file, it never sources it), builds or unpacks the unmodified upstream base
 system, applies your overlay, installs your package lists, and writes
 images plus an `out/SHA256` file.
+
+This stage comes after [Stage 3](03-packages.md) because the package
+step installs from upstream **and** your product repository: the media
+can only carry your packages once they are built and published.
 
 Always start with a dry run. It validates the configuration, prints every
 command the real build would run, and changes nothing. It works on any
@@ -20,12 +24,25 @@ POSIX host, including Linux and macOS:
 
 ## Build hosts
 
-| Base OS | Where the real build must run | Root needed |
-|---------|-------------------------------|-------------|
-| FreeBSD 16 | a FreeBSD host (or VM) with the matching `/usr/src` | yes (`chown`, `pw -R`, `pkg -r`) |
-| NetBSD 11.0 | the base and the image: any POSIX host (`src/build.sh` cross-builds its own tools). The package step (`pkg_add`): NetBSD only; elsewhere `build.sh` refuses it, or skips it with `WTFBSD_NO_PACKAGES=yes` | no: owners and modes go into the METALOG spec |
-| OpenBSD 8.0 | the site set: a FreeBSD or Linux host (bsdtar or GNU tar set the owners without root). The media step: OpenBSD. The base system is upstream's stock install sets; building base yourself needs OpenBSD (`release(8)`), there is no cross build | site set: no (on OpenBSD itself it must run as root); media step: root, through one `doas` rule |
-| DragonFly 6.4.2 | DragonFly itself; there is no cross build | yes |
+**FreeBSD 16**
+
+- Where the real build must run: a FreeBSD host (or VM) with the matching `/usr/src`
+- Root needed: yes (`chown`, `pw -R`, `pkg -r`)
+
+**NetBSD 11.0**
+
+- Where the real build must run: the base and the image: any POSIX host (`src/build.sh` cross-builds its own tools). The package step (`pkg_add`): NetBSD only; elsewhere `build.sh` refuses it, or skips it with `WTFBSD_NO_PACKAGES=yes`
+- Root needed: no: owners and modes go into the METALOG spec
+
+**OpenBSD 8.0**
+
+- Where the real build must run: the site set: a FreeBSD or Linux host (bsdtar or GNU tar set the owners without root). The media step: OpenBSD. The base system is upstream's stock install sets; building base yourself needs OpenBSD (`release(8)`), there is no cross build
+- Root needed: site set: no (on OpenBSD itself it must run as root); media step: root, through one `doas` rule
+
+**DragonFly 6.4.2**
+
+- Where the real build must run: DragonFly itself; there is no cross build
+- Root needed: yes
 
 Use a throwaway VM per build when you can (see [Stage 5](05-ci.md)). Build
 amd64 on amd64 and aarch64 on aarch64; cross-architecture package installs
@@ -172,12 +189,25 @@ built, and the installer only copies what is on the media.
 
 How to get there, per OS:
 
-| OS | Where firmware comes from | How to put all of it in the image |
-|----|---------------------------|-----------------------------------|
-| FreeBSD | packages. `drm-kmod` depends on the `gpu-firmware-kmod` meta-package (all GPU firmware); `wifi-firmware-kmod` is the meta-package for Wi-Fi firmware. `fwget(8)` installs firmware for the devices of the machine it runs on and needs the network | list the meta-packages in the desktop `packages.list` (the template's desktop list already carries `drm-kmod`); do not rely on `fwget` on the target |
-| NetBSD | mostly the base sets (`/libdata/firmware`); a few drivers need pkgsrc packages | unpack all base sets the drivers need; add any pkgsrc firmware to `packages.list`. Check each driver's man page |
-| OpenBSD | not in base; `fw_update(8)` fetches signed firmware packages, normally from the network after install | download the firmware packages at build time, check them against OpenBSD's signed `SHA256.sig` with `signify -C`, carry them with their `SHA256.sig` in the site set, and have `install.site` run `fw_update -p <that directory> -a`, which checks `SHA256.sig` against `/etc/signify/openbsd-80-fw.pub` and each file's checksum. Do not pass the `.tgz` files as arguments: `fw_update` does not verify files named on the command line. The installer also adds `fw_update` to `/etc/rc.firsttime`, a network fetch on first boot: remove that line in `install.site` |
-| DragonFly | mostly kernel modules in the base system; anything from DPorts goes in `packages.list` | check the driver man pages; add DPorts firmware packages by origin |
+**FreeBSD**
+
+- Where firmware comes from: packages. `drm-kmod` depends on the `gpu-firmware-kmod` meta-package (all GPU firmware); `wifi-firmware-kmod` is the meta-package for Wi-Fi firmware. `fwget(8)` installs firmware for the devices of the machine it runs on and needs the network
+- How to put all of it in the image: list the meta-packages in the desktop `packages.list` (the template's desktop list already carries `drm-kmod`); do not rely on `fwget` on the target
+
+**NetBSD**
+
+- Where firmware comes from: mostly the base sets (`/libdata/firmware`); a few drivers need pkgsrc packages
+- How to put all of it in the image: unpack all base sets the drivers need; add any pkgsrc firmware to `packages.list`. Check each driver's man page
+
+**OpenBSD**
+
+- Where firmware comes from: not in base; `fw_update(8)` fetches signed firmware packages, normally from the network after install
+- How to put all of it in the image: download the firmware packages at build time, check them against OpenBSD's signed `SHA256.sig` with `signify -C`, carry them with their `SHA256.sig` in the site set, and have `install.site` run `fw_update -p <that directory> -a`, which checks `SHA256.sig` against `/etc/signify/openbsd-80-fw.pub` and each file's checksum. Do not pass the `.tgz` files as arguments: `fw_update` does not verify files named on the command line. The installer also adds `fw_update` to `/etc/rc.firsttime`, a network fetch on first boot: remove that line in `install.site`
+
+**DragonFly**
+
+- Where firmware comes from: mostly kernel modules in the base system; anything from DPorts goes in `packages.list`
+- How to put all of it in the image: check the driver man pages; add DPorts firmware packages by origin
 
 Verification: upstream package repositories are signed (`pkg` checks the
 repository signature and each package checksum; OpenBSD packages and
