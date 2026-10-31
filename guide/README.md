@@ -15,18 +15,34 @@ An AI agent can do the whole thing for you: the matching agent skill is
 [wtfbsd/agents](https://github.com/wtfbsd/agents). This guide is the
 human version of the same stages.
 
+## Start here
+
+**[Quickstart: your first customized desktop in one sitting](00-quickstart.md)**
+walks through one small, complete change on FreeBSD 16: your name, a
+wallpaper and greeter theme in a package of your own, one extra
+application, media built and booted in a VM. Then read the stages for
+the reasons and for everything the quickstart leaves out.
+
 ## The stages
 
 | # | Stage | You end with |
 |---|-------|--------------|
 | 1 | [Fork and name](01-fork-and-name.md) | `product.conf` and four repositories under your org |
 | 2 | [Overlays and profiles](02-overlays-and-profiles.md) | your files and package lists on top of unmodified upstream |
-| 3 | [Build media](03-build-media.md) | images and ISOs per profile, with all firmware inside |
-| 4 | [Packages: upstream first](04-packages.md) | a decision per package: upstream's, or one of a few of your own |
-| 4b | [Packages per OS](04b-packages-per-os.md) | a small, signed product repository served over HTTPS |
+| 3 | [Packages: upstream first](03-packages.md) | a decision per package: upstream's, or one of a few of your own |
+| 3b | [Packages per OS](03b-packages-per-os.md) | a small, signed product repository served over HTTPS |
+| 4 | [Build media](04-build-media.md) | images and ISOs per profile, with all firmware inside |
 | 5 | [CI](05-ci.md) | Jenkins builds, boots, installs and tests every change |
 | 6 | [Release and publish](06-release-and-publish.md) | signed checksums, `latest.json`, release notes, a site |
 | 7 | [Operations](07-operations.md) | security updates, new upstream releases, versions |
+
+Packages come before media because the media build installs from the
+same two repositories your users get: upstream's and your product
+repository. Build the product repository first, then the media.
+
+The agent skill uses the same numbers, stage for stage. It also has a
+Stage 0 (prerequisites: read the contract, run its own tests) that is
+for the agent and has no page here.
 
 ## Supported bases
 
@@ -70,9 +86,9 @@ The templates build images, apply overlays, install package lists, boot
 images in bhyve and check for a login prompt. These pieces are described
 in this guide but are **not yet in the templates**; your fork adds them:
 
-- the firmware coverage gate (Stage 3);
 - building, signing and serving your product package repository, and
-  the repository files in the overlay (Stage 4);
+  the repository files in the overlay (Stage 3);
+- the firmware coverage gate (Stage 4);
 - the greeter screenshot check, the installer end-to-end test and a
   real-hardware stage (Stage 5);
 - the signed checksum file, `latest.json` and the site (Stage 6).

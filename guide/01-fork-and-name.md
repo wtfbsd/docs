@@ -126,7 +126,7 @@ existing forks make a re-run refuse, so delete or rename them first.
 The slug is in repository names, image file names
 (`<slug>-<profile>-<arch>.img`), install paths
 (`/usr/local/share/<slug>/`), helper commands (`<slug>-install`), package
-names (Stage 4) and repository names in client configuration. Changing it
+names (Stage 3) and repository names in client configuration. Changing it
 later touches every one of those. Pick something short, lowercase, and
 not the name of an existing project.
 
@@ -138,12 +138,12 @@ Everything you change lives in your fork, never in the upstream system:
 |------|-----------------------------|
 | Files on the installed system | `overlay/base/rootfs/`, `overlay/profiles/<profile>/rootfs/` |
 | Packages | `overlay/base/packages.list`, `overlay/profiles/<profile>/packages.list` |
-| Drivers and firmware | the package lists (driver and firmware packages), see [Stage 3](03-build-media.md) |
+| Drivers and firmware | the package lists (driver and firmware packages), see [Stage 4](04-build-media.md) |
 | Base system knobs | `overlay/base/src.conf` (FreeBSD; `WITHOUT_` knobs only) |
 | Branding | `MOTD`, `BRAND_COLOR`, `BRAND_URL` in answers; artwork under `/usr/local/share/<slug>/artwork/` delivered by your own package; `overlay/profiles/desktop/branding.conf` on FreeBSD |
 | First-boot user | the `firstboot_user` rc script and its config file, see [Stage 2](02-overlays-and-profiles.md) |
 | Profiles | which of `desktop` / `appliance` you build, and what each adds |
-| Your own package repository | client configuration in `overlay/base/rootfs/`, see [Stage 4](04-packages.md) |
+| Your own package repository | client configuration in `overlay/base/rootfs/`, see [Stage 3](03-packages.md) |
 
 Placeholders in overlay files (`@DISTRO_NAME@`, `@SLUG@`, `@MOTD@`,
 `@BRAND_URL@`, and on NetBSD `@ZFS_POOL_NAME@`) are filled in by `build.sh`

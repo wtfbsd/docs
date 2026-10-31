@@ -2,7 +2,7 @@
 
 # Stage 2: overlays on unmodified upstream, and profiles
 
-[Index](README.md) · Previous: [Stage 1](01-fork-and-name.md) · Next: [Stage 3: build media](03-build-media.md)
+[Index](README.md) · Previous: [Stage 1](01-fork-and-name.md) · Next: [Stage 3: packages](03-packages.md)
 
 Your distribution is **the upstream system plus layers of your own
 files and packages**. You never patch the upstream source tree, and you
@@ -69,13 +69,37 @@ Rules that came from getting this wrong:
 The same idea works everywhere, but each system reads configuration in its
 own way. These are the rules the templates already enforce.
 
-| | FreeBSD 16 | NetBSD 11.0 | OpenBSD 8.0 | DragonFly 6.4.2 |
-|---|---|---|---|---|
-| How the overlay reaches the system | copied into the staged root before `makefs`/`mkimg` | copied into the stage; owners and modes written into the METALOG spec for `nbmakefs -F` | packed as a **site set** (`site80.tgz`) that the installer unpacks; `/install.site` runs in a chroot | staged as `ROOTSKELS` for `nrelease`, then `tools/post-customize.sh` |
-| Service settings | `/etc/rc.conf.d/<service>` (named after the service) | `/etc/rc.conf.d/<service>`, `name=YES` (no `_enable`) | one `/etc/rc.conf.local`; profiles append a fragment; `daemon_flags=` / `pkg_scripts` | `rc.conf` variables merged by the post-customize step |
-| Package prefix | `/usr/local` | `/usr/pkg` | `/usr/local` | `/usr/local` |
-| Package list holds | package names | pkgsrc package names | package names (installed by `install.site` with `pkg_add`) | DPorts **origins** (`category/port`) |
-| Build knobs | `overlay/base/src.conf` as `SRCCONF` | none in the template | none | none |
+**FreeBSD 16**
+
+- How the overlay reaches the system: copied into the staged root before `makefs`/`mkimg`
+- Service settings: `/etc/rc.conf.d/<service>` (named after the service)
+- Package prefix: `/usr/local`
+- Package list holds: package names
+- Build knobs: `overlay/base/src.conf` as `SRCCONF`
+
+**NetBSD 11.0**
+
+- How the overlay reaches the system: copied into the stage; owners and modes written into the METALOG spec for `nbmakefs -F`
+- Service settings: `/etc/rc.conf.d/<service>`, `name=YES` (no `_enable`)
+- Package prefix: `/usr/pkg`
+- Package list holds: pkgsrc package names
+- Build knobs: none in the template
+
+**OpenBSD 8.0**
+
+- How the overlay reaches the system: packed as a **site set** (`site80.tgz`) that the installer unpacks; `/install.site` runs in a chroot
+- Service settings: one `/etc/rc.conf.local`; profiles append a fragment; `daemon_flags=` / `pkg_scripts`
+- Package prefix: `/usr/local`
+- Package list holds: package names (installed by `install.site` with `pkg_add`)
+- Build knobs: none
+
+**DragonFly 6.4.2**
+
+- How the overlay reaches the system: staged as `ROOTSKELS` for `nrelease`, then `tools/post-customize.sh`
+- Service settings: `rc.conf` variables merged by the post-customize step
+- Package prefix: `/usr/local`
+- Package list holds: DPorts **origins** (`category/port`)
+- Build knobs: none
 
 Two traps worth knowing:
 
@@ -143,7 +167,7 @@ can be fixed later with `pkg upgrade` / `pkg_add -u`. Use the overlay for
 what must exist before the network is up (repository configuration,
 keys, first-boot logic, rc settings). Use your own packages for
 everything you expect to change (artwork, default desktop settings,
-helper scripts). See [Stage 4](04-packages.md) for keeping those packages
+helper scripts). See [Stage 3](03-packages.md) for keeping those packages
 few and small.
 
 ## Check that it worked

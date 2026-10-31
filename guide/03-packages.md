@@ -1,8 +1,8 @@
 <!-- Copyright (c) 2026 The wtfbsd contributors. BSD-2-Clause (see LICENSE). -->
 
-# Stage 4: packages, upstream first, plus a small repository of your own
+# Stage 3: packages, upstream first, plus a small repository of your own
 
-[Index](README.md) · Previous: [Stage 3](03-build-media.md) · Per-OS commands: [Stage 4b](04b-packages-per-os.md) · Next: [Stage 5: CI](05-ci.md)
+[Index](README.md) · Previous: [Stage 2](02-overlays-and-profiles.md) · Per-OS commands: [Stage 3b](03b-packages-per-os.md) · Next: [Stage 4: build media](04-build-media.md)
 
 ## The rule
 
@@ -52,8 +52,43 @@ examplebsd-desktop      meta      pulls the desktop from upstream
 examplebsd-firstboot    product   first-boot account helper
 ```
 
-The publish step refuses to publish a package that is not in this list,
-and CI refuses a line without a reason. See the check at the end.
+Every publish and every CI run checks the list against the repository:
+see [the self-hosted check](#the-self-hosted-check) below.
+
+## The self-hosted check
+
+This is the one statement of the check; the other pages point here.
+List every package in the product repository and compare it with
+`ours.list`. The check **fails** when:
+
+1. a published package is not in `ours.list`;
+2. a line of `ours.list` has no reason from the table above, or no note
+   after the reason;
+3. a published package is identical in name and version to a package in
+   the upstream repository (it should come from upstream).
+
+If it read nothing (a missing or unreadable file, an empty list, a query
+that returned no packages) it reports "could not look", which is never
+a pass: an empty answer usually means a wrong repository URL or a
+signing mismatch.
+
+The check is `scripts/ours-check.sh` in
+[wtfbsd/agents](https://github.com/wtfbsd/agents); copy it into your
+`<slug>-ports` repository as `tests/ours-check.sh`:
+
+```sh
+sh tests/ours-check.sh ours.list published.txt                         # conditions 1 and 2
+sh tests/ours-check.sh ours.list published.txt upstream.nv published.nv  # and 3
+```
+
+`published.txt` holds the package names in your repository, one per
+line; `upstream.nv` and `published.nv` hold `name-version` lines of the
+upstream repository and of yours. Exit status: 0 pass, 1 fail (each
+problem is printed on its own line), 2 could not look. How to produce
+the three lists on each system is in
+[Stage 3b](03b-packages-per-os.md#check-that-it-worked-all-systems).
+Run it in CI after every publish, and prove it red once with a bad
+line before you trust its green.
 
 ## Keep "ours" small
 
@@ -139,7 +174,7 @@ Any static HTTPS web server works. Package clients only fetch files.
 so the installed system and every later update use upstream plus your
 repository. The upstream repository file is left as upstream ships it; you
 add a file next to it. The exact files per OS are in
-[Stage 4b](04b-packages-per-os.md).
+[Stage 3b](03b-packages-per-os.md).
 
 ## How media builds pull from both
 
@@ -170,8 +205,5 @@ host:
    status 0, so check the count, not the exit status.
 2. `pkg install -n examplebsd-desktop` (or the OS equivalent) resolves
    every dependency from upstream.
-3. **The self-hosted check:** list every package in the product
-   repository and compare with `ours.list`. Fail when a published package
-   is not listed, when a line has no reason from the table above, or when
-   a published package is identical in name and version to the upstream
-   one (it should come from upstream).
+3. [The self-hosted check](#the-self-hosted-check) passes against the
+   live repository.
