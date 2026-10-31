@@ -26,18 +26,27 @@ from source. With 8 make jobs (`JOBS=8`) the whole build takes about
   (`gh auth login`).
 - A build host: a FreeBSD 16 amd64 machine or VM, with root, network
   access to the upstream package repository, a FreeBSD 16 source tree in
-  `/usr/src`, and about 45 GB of free disk for the source, the world
-  build and the images (the two images alone are about 26 GB before
-  compression). FreeBSD 16 is the
-  development branch (16-CURRENT); there is no 16.0-RELEASE yet. git is
-  not in the base system, so on a fresh system install it first, then
-  fetch the `main` branch:
+  `/usr/src`, a ports tree in `/usr/ports`, and about 50 GB of free disk
+  for the source, the ports tree, the world build and the images (the
+  two images alone are about 23 GB before compression). FreeBSD 16 is
+  the development branch (16-CURRENT); there is no 16.0-RELEASE yet. git
+  is not in the base system, so on a fresh system install it first, then
+  fetch the `main` branch of both trees (the ports tree is about 1.1 GB):
 
   ```sh
   pkg bootstrap
   pkg install git-lite
   git clone --depth 1 https://git.FreeBSD.org/src.git /usr/src
+  git clone --depth 1 https://git.FreeBSD.org/ports.git /usr/ports
   ```
+
+  The ports tree is there because the template rebuilds out-of-kernel
+  drivers (`KMOD_REBUILD=yes`, the default) for the exact kernel it
+  built when the repository's builds of them do not match it; when they
+  already match, nothing is rebuilt. Building with
+  `KMOD_REBUILD=no ALLOW_KMOD_MISMATCH=yes` skips that and the ports
+  tree, but only as an explicit escape: a kernel and driver that do not
+  match can panic the GPU drivers.
 
   The build runs one make job per CPU; set `JOBS` to change that, for
   example `JOBS=8 ./build.sh ...` (the knob is described at the top of
@@ -237,8 +246,9 @@ firefox
 
 `firefox` is an upstream package: it comes from FreeBSD's repository
 exactly as FreeBSD builds it, so it does not go in `ours.list`. Pick any
-other upstream application the same way; `pkg search <name>` on the
-build host shows what upstream has.
+other upstream application the same way; `pkg search <name>`, run as
+root on the build host, shows what upstream has (as a normal user it can
+return nothing).
 
 To change more of the greeter than the background and the user image,
 edit the same `lightdm-gtk-greeter.conf` in the overlay. The settings it
@@ -283,10 +293,9 @@ image), `out/desktop/examplebsd-desktop-amd64.iso` (the installer) and
 with the line in `out/SHA256`.
 
 A build that finishes in seconds built nothing: check that both files
-exist and have a sensible size. At the time of writing the `.img` and
-the `.iso` are each about 13 GB; they get smaller once the template
-drops the package cache and debug files from the image. For the full list of what `build.sh`
-does, see [Stage 4](04-build-media.md#freebsd-16).
+exist and have a sensible size. At the time of writing the `.img` is
+about 13 GB and the `.iso` about 10 GB. For the full list of what
+`build.sh` does, see [Stage 4](04-build-media.md#freebsd-16).
 
 ## 7. Boot it and see the change
 
@@ -322,12 +331,12 @@ starts a graphical VM yet, so use your VM software:
    **your logo** as the user picture.
 5. Log in. Xfce starts, and **Firefox** is in the applications menu.
 
-**Known issue.** At the time of writing the greeter may not appear
-after the install. If you get a text login, log in there as the user you
-created; the system works, only the graphical login is missing. If the
-screen stays black, switch to the text console with Ctrl+Alt+F2 (or use
-the serial console) and log in there. A template fix is in progress;
-steps 4 and 5 are what you get once it lands.
+**Known issue.** On a VM without a GPU driver the greeter can fail in
+Xorg's GLX setup, so the screen stays black or shows a text login. Until
+the template fix (GLX off in the scfb fallback) lands, log in as the user
+you created on the text console (Ctrl+Alt+F2) or the serial console;
+the rest of the system works. Steps 4 and 5 are what you get once the
+fix lands.
 
 What you will not see yet: the Xfce desktop background after login is
 still Xfce's default. The template sets the greeter's background, not the
