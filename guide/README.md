@@ -35,6 +35,7 @@ the reasons and for everything the quickstart leaves out.
 | 5 | [CI](05-ci.md) | Jenkins builds, boots, installs and tests every change |
 | 6 | [Release and publish](06-release-and-publish.md) | signed checksums, `latest.json`, release notes, a site |
 | 7 | [Operations](07-operations.md) | security updates, new upstream releases, versions |
+| 8 | [Security](08-security.md) | a reviewed, audited way of working; hardened media; daily vulnerability audits; a `SECURITY.md` in every repository |
 
 Packages come before media because the media build installs from the
 same two repositories your users get: upstream's and your product
@@ -91,4 +92,6 @@ in this guide but are **not yet in the templates**; your fork adds them:
 - the firmware coverage gate (Stage 4);
 - the greeter screenshot check, the installer end-to-end test and a
   real-hardware stage (Stage 5);
-- the signed checksum file, `latest.json` and the site (Stage 6).
+- the signed checksum file, `latest.json` and the site (Stage 6);
+- the hardening settings, the vulnerability audits and the listening-socket
+  check (Stage 8).

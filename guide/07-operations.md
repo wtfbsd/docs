@@ -2,7 +2,7 @@
 
 # Stage 7: operations: updates, new upstream releases, versions
 
-[Index](README.md) · Previous: [Stage 6](06-release-and-publish.md)
+[Index](README.md) · Previous: [Stage 6](06-release-and-publish.md) · Next: [Stage 8](08-security.md)
 
 After the first release you have three jobs: keep installed systems
 patched, move to each new upstream release, and keep version numbers that
@@ -50,6 +50,9 @@ The routine:
    installed systems are already fixed through packages: new installs
    should start patched.
 4. Say in the release notes which advisory a release fixes.
+
+The daily audit on installed systems and the audit that fails a build
+on a known vulnerability are in [Stage 8](08-security.md#part-2-what-the-product-ships).
 
 ## Rolling to a new upstream release
 
