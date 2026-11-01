@@ -17,6 +17,15 @@ If you cannot use GitHub, write to the maintainers at CONTACT.
 Include what you can of: the affected file or package, the version or
 commit, the steps that show the problem, and what an attacker gains.
 
+## Testing
+
+Find problems on systems you own or are authorised to test: build the
+code or media yourself and test your own copy. You are not authorised
+to scan, probe or attack the project's infrastructure (its sites,
+package and release servers, CI) or anyone else's systems, and there is
+no safe harbour for doing so. A report about the project's
+infrastructure is welcome; testing it is not.
+
 ## What happens next
 
 1. **We confirm** that we have the report, and tell you whether we
