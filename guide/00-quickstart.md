@@ -246,9 +246,8 @@ firefox
 
 `firefox` is an upstream package: it comes from FreeBSD's repository
 exactly as FreeBSD builds it, so it does not go in `ours.list`. Pick any
-other upstream application the same way; `pkg search <name>`, run as
-root on the build host, shows what upstream has (as a normal user it can
-return nothing).
+other upstream application the same way; `pkg search <name>` on the
+build host shows what upstream has.
 
 To change more of the greeter than the background and the user image,
 edit the same `lightdm-gtk-greeter.conf` in the overlay. The settings it
@@ -331,12 +330,8 @@ starts a graphical VM yet, so use your VM software:
    **your logo** as the user picture.
 5. Log in. Xfce starts, and **Firefox** is in the applications menu.
 
-**Known issue.** On a VM without a GPU driver the greeter can fail in
-Xorg's GLX setup, so the screen stays black or shows a text login. Until
-the template fix (GLX off in the scfb fallback) lands, log in as the user
-you created on the text console (Ctrl+Alt+F2) or the serial console;
-the rest of the system works. Steps 4 and 5 are what you get once the
-fix lands.
+On a VM without a GPU driver the system uses the plain framebuffer
+driver (scfb) with GLX turned off; the greeter and Xfce work the same.
 
 What you will not see yet: the Xfce desktop background after login is
 still Xfce's default. The template sets the greeter's background, not the
