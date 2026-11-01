@@ -291,6 +291,9 @@ The `SECURITY.md` for every wtfbsd repository is
 [`templates/SECURITY.md`](../templates/SECURITY.md): report privately through GitHub's private vulnerability reporting; the
 report is confirmed, fixed, released, and published as an advisory with
 a CVE and credit to the reporter; `main` is the supported branch.
+It also says that nobody is authorised to scan, probe or attack the
+project's infrastructure: testers build and test their own copy. Keep
+that section in the user's copy.
 
 Give every repository of the user's product the same file:
 
