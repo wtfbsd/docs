@@ -10,6 +10,9 @@ Start here:
 2. **[The ecosystem playbook](guide/README.md)**, a stage-by-stage guide
    to making, building, publishing and maintaining your own BSD
    distribution.
+3. **[Security](guide/08-security.md)**, how to review and audit the
+   work, what the product ships hardened and audited, and the
+   `SECURITY.md` every repository carries ([template](templates/SECURITY.md)).
 
 Part of the [wtfbsd](https://github.com/wtfbsd) template set. See [wtfbsd.ai](https://wtfbsd.ai).
 
